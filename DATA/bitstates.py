@@ -44,6 +44,12 @@ class Bitstates(Sequence):
             if value & v:
                 yield v
 
+    def nset(self, value):
+        i = 0
+        for v in self.decompose(value):
+            i += 1
+        return i
+
     ## def shift(self, offset):
     ##     self.offset += offset
     ##     if offset > 0:
@@ -173,3 +179,6 @@ class Bitstates(Sequence):
 
     def __len__(self):
         return self.size
+
+    def __call__(self, x):
+        return self.states(x)

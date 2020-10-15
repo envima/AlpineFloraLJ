@@ -1,5 +1,6 @@
 **clades/
-clades original/
+clades_original/
+clades_adapted/
 *.gz
 
 # Byte-compiled / optimized / DLL files
