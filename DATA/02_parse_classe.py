@@ -138,7 +138,7 @@ def getfile(base, taxon, template):
 if __name__ == '__main__':
     ## import ray
     ## ray.init()
-    base = 'clades'
+    base = 'C:/Users/nauss_lokal/Documents/plygrnd/AlpineFloraLJ/AlpineFloraLJ\clades_test/'
     taxa = filter(lambda x: not x.startswith('__'), next(os.walk(base))[1])
     results = {}
     ## @ray.remote
