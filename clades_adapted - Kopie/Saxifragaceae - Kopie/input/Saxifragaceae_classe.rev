@@ -1,0 +1,1076 @@
+# This file is going to be run in the Software Revbayes.
+# Please change the file path to where your documents are stored.
+
+fn <- "add your own file path"
+treefile <- fn+"Saxifragaceae.nex"
+classe_state_datafile <- fn+"Saxifragaceae_states.csv"
+outfilebase <- fn+"Saxifragaceae"
+
+observed_phylogeny <- readTrees(treefile)[1]
+root_age <- observed_phylogeny.rootAge()
+
+chardata <- readCharacterDataDelimited(classe_state_datafile, stateLabels=47, type="NaturalNumbers", delimiter=",", headers=FALSE)
+ntaxa = chardata.ntaxa()
+
+mvi <- 0
+mni <- 0
+total_diversity <- 765
+netdiv_mean <- ln(ln(total_diversity/2.0))/root_age
+netdiv_sd <- 1.0
+expected_num_events <- 1
+rate_pr := observed_phylogeny.treeLength() / expected_num_events
+extinction ~ dnLognormal(netdiv_mean, netdiv_sd)
+moves[++mvi] = mvSlide(extinction, weight=1)
+speciation ~ dnExp(rate_pr)
+moves[++mvi] = mvSlide(speciation, weight=1)
+dispersal ~ dnExp(rate_pr)
+moves[++mvi] = mvSlide(dispersal, weight=1)
+biome_transition ~ dnExp(rate_pr)
+moves[++mvi] = mvSlide(biome_transition, weight=1)
+# extinction rates
+extinction_rates[1] := extinction  # null
+extinction_rates[2] := extinction  # H+a
+extinction_rates[3] := extinction  # Y+a
+extinction_rates[4] := extinction  # T+a
+extinction_rates[5] := extinction  # O+a
+extinction_rates[6] <- 0.0  # HY+a
+extinction_rates[7] <- 0.0  # HT+a
+extinction_rates[8] <- 0.0  # HO+a
+extinction_rates[9] <- 0.0  # YT+a
+extinction_rates[10] <- 0.0  # YO+a
+extinction_rates[11] <- 0.0  # TO+a
+extinction_rates[12] <- 0.0  # HYT+a
+extinction_rates[13] <- 0.0  # HYO+a
+extinction_rates[14] <- 0.0  # HTO+a
+extinction_rates[15] <- 0.0  # YTO+a
+extinction_rates[16] <- 0.0  # HYTO+a
+extinction_rates[17] := extinction  # H+A
+extinction_rates[18] := extinction  # Y+A
+extinction_rates[19] := extinction  # T+A
+extinction_rates[20] := extinction  # O+A
+extinction_rates[21] <- 0.0  # HY+A
+extinction_rates[22] <- 0.0  # HT+A
+extinction_rates[23] <- 0.0  # HO+A
+extinction_rates[24] <- 0.0  # YT+A
+extinction_rates[25] <- 0.0  # YO+A
+extinction_rates[26] <- 0.0  # TO+A
+extinction_rates[27] <- 0.0  # HYT+A
+extinction_rates[28] <- 0.0  # HYO+A
+extinction_rates[29] <- 0.0  # HTO+A
+extinction_rates[30] <- 0.0  # YTO+A
+extinction_rates[31] <- 0.0  # HYTO+A
+extinction_rates[32] := extinction  # H+aA
+extinction_rates[33] := extinction  # Y+aA
+extinction_rates[34] := extinction  # T+aA
+extinction_rates[35] := extinction  # O+aA
+extinction_rates[36] <- 0.0  # HY+aA
+extinction_rates[37] <- 0.0  # HT+aA
+extinction_rates[38] <- 0.0  # HO+aA
+extinction_rates[39] <- 0.0  # YT+aA
+extinction_rates[40] <- 0.0  # YO+aA
+extinction_rates[41] <- 0.0  # TO+aA
+extinction_rates[42] <- 0.0  # HYT+aA
+extinction_rates[43] <- 0.0  # HYO+aA
+extinction_rates[44] <- 0.0  # HTO+aA
+extinction_rates[45] <- 0.0  # YTO+aA
+extinction_rates[46] <- 0.0  # HYTO+aA
+
+for (i in 1:46) {
+  for (j in 1:46) {
+    anarates[i][j] <- 0.0
+  }
+}
+
+# populate non-zero anagenetic rates
+anarates[2][1] := extinction  # H+a->null
+anarates[17][1] := extinction  # H+A->null
+anarates[32][1] := extinction  # H+aA->null
+anarates[3][1] := extinction  # Y+a->null
+anarates[18][1] := extinction  # Y+A->null
+anarates[33][1] := extinction  # Y+aA->null
+anarates[4][1] := extinction  # T+a->null
+anarates[19][1] := extinction  # T+A->null
+anarates[34][1] := extinction  # T+aA->null
+anarates[5][1] := extinction  # O+a->null
+anarates[20][1] := extinction  # O+A->null
+anarates[35][1] := extinction  # O+aA->null
+anarates[6][2] := extinction  # HY+a->H+a
+anarates[2][6] := dispersal * 1.0  # H+a->HY+a
+anarates[7][2] := extinction  # HT+a->H+a
+anarates[2][7] := dispersal * 1.0  # H+a->HT+a
+anarates[8][2] := extinction  # HO+a->H+a
+anarates[2][8] := dispersal * 1.0  # H+a->HO+a
+anarates[32][2] := biome_transition  # H+aA->H+a
+anarates[2][32] := biome_transition  # H+a->H+aA
+anarates[6][3] := extinction  # HY+a->Y+a
+anarates[3][6] := dispersal * 1.0  # Y+a->HY+a
+anarates[9][3] := extinction  # YT+a->Y+a
+anarates[3][9] := dispersal * 1.0  # Y+a->YT+a
+anarates[10][3] := extinction  # YO+a->Y+a
+anarates[3][10] := dispersal * 1.0  # Y+a->YO+a
+anarates[33][3] := biome_transition  # Y+aA->Y+a
+anarates[3][33] := biome_transition  # Y+a->Y+aA
+anarates[7][4] := extinction  # HT+a->T+a
+anarates[4][7] := dispersal * 1.0  # T+a->HT+a
+anarates[9][4] := extinction  # YT+a->T+a
+anarates[4][9] := dispersal * 1.0  # T+a->YT+a
+anarates[11][4] := extinction  # TO+a->T+a
+anarates[4][11] := dispersal * 1.0  # T+a->TO+a
+anarates[34][4] := biome_transition  # T+aA->T+a
+anarates[4][34] := biome_transition  # T+a->T+aA
+anarates[8][5] := extinction  # HO+a->O+a
+anarates[5][8] := dispersal * 1.0  # O+a->HO+a
+anarates[10][5] := extinction  # YO+a->O+a
+anarates[5][10] := dispersal * 1.0  # O+a->YO+a
+anarates[11][5] := extinction  # TO+a->O+a
+anarates[5][11] := dispersal * 1.0  # O+a->TO+a
+anarates[35][5] := biome_transition  # O+aA->O+a
+anarates[5][35] := biome_transition  # O+a->O+aA
+anarates[12][6] := extinction  # HYT+a->HY+a
+anarates[6][12] := dispersal * 2.0  # HY+a->HYT+a
+anarates[13][6] := extinction  # HYO+a->HY+a
+anarates[6][13] := dispersal * 2.0  # HY+a->HYO+a
+anarates[36][6] := biome_transition  # HY+aA->HY+a
+anarates[6][36] := biome_transition  # HY+a->HY+aA
+anarates[12][7] := extinction  # HYT+a->HT+a
+anarates[7][12] := dispersal * 2.0  # HT+a->HYT+a
+anarates[14][7] := extinction  # HTO+a->HT+a
+anarates[7][14] := dispersal * 2.0  # HT+a->HTO+a
+anarates[37][7] := biome_transition  # HT+aA->HT+a
+anarates[7][37] := biome_transition  # HT+a->HT+aA
+anarates[13][8] := extinction  # HYO+a->HO+a
+anarates[8][13] := dispersal * 2.0  # HO+a->HYO+a
+anarates[14][8] := extinction  # HTO+a->HO+a
+anarates[8][14] := dispersal * 2.0  # HO+a->HTO+a
+anarates[38][8] := biome_transition  # HO+aA->HO+a
+anarates[8][38] := biome_transition  # HO+a->HO+aA
+anarates[12][9] := extinction  # HYT+a->YT+a
+anarates[9][12] := dispersal * 2.0  # YT+a->HYT+a
+anarates[15][9] := extinction  # YTO+a->YT+a
+anarates[9][15] := dispersal * 2.0  # YT+a->YTO+a
+anarates[39][9] := biome_transition  # YT+aA->YT+a
+anarates[9][39] := biome_transition  # YT+a->YT+aA
+anarates[13][10] := extinction  # HYO+a->YO+a
+anarates[10][13] := dispersal * 2.0  # YO+a->HYO+a
+anarates[15][10] := extinction  # YTO+a->YO+a
+anarates[10][15] := dispersal * 2.0  # YO+a->YTO+a
+anarates[40][10] := biome_transition  # YO+aA->YO+a
+anarates[10][40] := biome_transition  # YO+a->YO+aA
+anarates[14][11] := extinction  # HTO+a->TO+a
+anarates[11][14] := dispersal * 2.0  # TO+a->HTO+a
+anarates[15][11] := extinction  # YTO+a->TO+a
+anarates[11][15] := dispersal * 2.0  # TO+a->YTO+a
+anarates[41][11] := biome_transition  # TO+aA->TO+a
+anarates[11][41] := biome_transition  # TO+a->TO+aA
+anarates[16][12] := extinction  # HYTO+a->HYT+a
+anarates[12][16] := dispersal * 3.0  # HYT+a->HYTO+a
+anarates[42][12] := biome_transition  # HYT+aA->HYT+a
+anarates[12][42] := biome_transition  # HYT+a->HYT+aA
+anarates[16][13] := extinction  # HYTO+a->HYO+a
+anarates[13][16] := dispersal * 3.0  # HYO+a->HYTO+a
+anarates[43][13] := biome_transition  # HYO+aA->HYO+a
+anarates[13][43] := biome_transition  # HYO+a->HYO+aA
+anarates[16][14] := extinction  # HYTO+a->HTO+a
+anarates[14][16] := dispersal * 3.0  # HTO+a->HYTO+a
+anarates[44][14] := biome_transition  # HTO+aA->HTO+a
+anarates[14][44] := biome_transition  # HTO+a->HTO+aA
+anarates[16][15] := extinction  # HYTO+a->YTO+a
+anarates[15][16] := dispersal * 3.0  # YTO+a->HYTO+a
+anarates[45][15] := biome_transition  # YTO+aA->YTO+a
+anarates[15][45] := biome_transition  # YTO+a->YTO+aA
+anarates[46][16] := biome_transition  # HYTO+aA->HYTO+a
+anarates[16][46] := biome_transition  # HYTO+a->HYTO+aA
+anarates[21][17] := extinction  # HY+A->H+A
+anarates[17][21] := dispersal * 1.0  # H+A->HY+A
+anarates[22][17] := extinction  # HT+A->H+A
+anarates[17][22] := dispersal * 1.0  # H+A->HT+A
+anarates[23][17] := extinction  # HO+A->H+A
+anarates[17][23] := dispersal * 1.0  # H+A->HO+A
+anarates[32][17] := biome_transition  # H+aA->H+A
+anarates[17][32] := biome_transition  # H+A->H+aA
+anarates[21][18] := extinction  # HY+A->Y+A
+anarates[18][21] := dispersal * 1.0  # Y+A->HY+A
+anarates[24][18] := extinction  # YT+A->Y+A
+anarates[18][24] := dispersal * 1.0  # Y+A->YT+A
+anarates[25][18] := extinction  # YO+A->Y+A
+anarates[18][25] := dispersal * 1.0  # Y+A->YO+A
+anarates[33][18] := biome_transition  # Y+aA->Y+A
+anarates[18][33] := biome_transition  # Y+A->Y+aA
+anarates[22][19] := extinction  # HT+A->T+A
+anarates[19][22] := dispersal * 1.0  # T+A->HT+A
+anarates[24][19] := extinction  # YT+A->T+A
+anarates[19][24] := dispersal * 1.0  # T+A->YT+A
+anarates[26][19] := extinction  # TO+A->T+A
+anarates[19][26] := dispersal * 1.0  # T+A->TO+A
+anarates[34][19] := biome_transition  # T+aA->T+A
+anarates[19][34] := biome_transition  # T+A->T+aA
+anarates[23][20] := extinction  # HO+A->O+A
+anarates[20][23] := dispersal * 1.0  # O+A->HO+A
+anarates[25][20] := extinction  # YO+A->O+A
+anarates[20][25] := dispersal * 1.0  # O+A->YO+A
+anarates[26][20] := extinction  # TO+A->O+A
+anarates[20][26] := dispersal * 1.0  # O+A->TO+A
+anarates[35][20] := biome_transition  # O+aA->O+A
+anarates[20][35] := biome_transition  # O+A->O+aA
+anarates[27][21] := extinction  # HYT+A->HY+A
+anarates[21][27] := dispersal * 2.0  # HY+A->HYT+A
+anarates[28][21] := extinction  # HYO+A->HY+A
+anarates[21][28] := dispersal * 2.0  # HY+A->HYO+A
+anarates[36][21] := biome_transition  # HY+aA->HY+A
+anarates[21][36] := biome_transition  # HY+A->HY+aA
+anarates[27][22] := extinction  # HYT+A->HT+A
+anarates[22][27] := dispersal * 2.0  # HT+A->HYT+A
+anarates[29][22] := extinction  # HTO+A->HT+A
+anarates[22][29] := dispersal * 2.0  # HT+A->HTO+A
+anarates[37][22] := biome_transition  # HT+aA->HT+A
+anarates[22][37] := biome_transition  # HT+A->HT+aA
+anarates[28][23] := extinction  # HYO+A->HO+A
+anarates[23][28] := dispersal * 2.0  # HO+A->HYO+A
+anarates[29][23] := extinction  # HTO+A->HO+A
+anarates[23][29] := dispersal * 2.0  # HO+A->HTO+A
+anarates[38][23] := biome_transition  # HO+aA->HO+A
+anarates[23][38] := biome_transition  # HO+A->HO+aA
+anarates[27][24] := extinction  # HYT+A->YT+A
+anarates[24][27] := dispersal * 2.0  # YT+A->HYT+A
+anarates[30][24] := extinction  # YTO+A->YT+A
+anarates[24][30] := dispersal * 2.0  # YT+A->YTO+A
+anarates[39][24] := biome_transition  # YT+aA->YT+A
+anarates[24][39] := biome_transition  # YT+A->YT+aA
+anarates[28][25] := extinction  # HYO+A->YO+A
+anarates[25][28] := dispersal * 2.0  # YO+A->HYO+A
+anarates[30][25] := extinction  # YTO+A->YO+A
+anarates[25][30] := dispersal * 2.0  # YO+A->YTO+A
+anarates[40][25] := biome_transition  # YO+aA->YO+A
+anarates[25][40] := biome_transition  # YO+A->YO+aA
+anarates[29][26] := extinction  # HTO+A->TO+A
+anarates[26][29] := dispersal * 2.0  # TO+A->HTO+A
+anarates[30][26] := extinction  # YTO+A->TO+A
+anarates[26][30] := dispersal * 2.0  # TO+A->YTO+A
+anarates[41][26] := biome_transition  # TO+aA->TO+A
+anarates[26][41] := biome_transition  # TO+A->TO+aA
+anarates[31][27] := extinction  # HYTO+A->HYT+A
+anarates[27][31] := dispersal * 3.0  # HYT+A->HYTO+A
+anarates[42][27] := biome_transition  # HYT+aA->HYT+A
+anarates[27][42] := biome_transition  # HYT+A->HYT+aA
+anarates[31][28] := extinction  # HYTO+A->HYO+A
+anarates[28][31] := dispersal * 3.0  # HYO+A->HYTO+A
+anarates[43][28] := biome_transition  # HYO+aA->HYO+A
+anarates[28][43] := biome_transition  # HYO+A->HYO+aA
+anarates[31][29] := extinction  # HYTO+A->HTO+A
+anarates[29][31] := dispersal * 3.0  # HTO+A->HYTO+A
+anarates[44][29] := biome_transition  # HTO+aA->HTO+A
+anarates[29][44] := biome_transition  # HTO+A->HTO+aA
+anarates[31][30] := extinction  # HYTO+A->YTO+A
+anarates[30][31] := dispersal * 3.0  # YTO+A->HYTO+A
+anarates[45][30] := biome_transition  # YTO+aA->YTO+A
+anarates[30][45] := biome_transition  # YTO+A->YTO+aA
+anarates[46][31] := biome_transition  # HYTO+aA->HYTO+A
+anarates[31][46] := biome_transition  # HYTO+A->HYTO+aA
+anarates[36][32] := extinction  # HY+aA->H+aA
+anarates[32][36] := dispersal * 1.0  # H+aA->HY+aA
+anarates[37][32] := extinction  # HT+aA->H+aA
+anarates[32][37] := dispersal * 1.0  # H+aA->HT+aA
+anarates[38][32] := extinction  # HO+aA->H+aA
+anarates[32][38] := dispersal * 1.0  # H+aA->HO+aA
+anarates[36][33] := extinction  # HY+aA->Y+aA
+anarates[33][36] := dispersal * 1.0  # Y+aA->HY+aA
+anarates[39][33] := extinction  # YT+aA->Y+aA
+anarates[33][39] := dispersal * 1.0  # Y+aA->YT+aA
+anarates[40][33] := extinction  # YO+aA->Y+aA
+anarates[33][40] := dispersal * 1.0  # Y+aA->YO+aA
+anarates[37][34] := extinction  # HT+aA->T+aA
+anarates[34][37] := dispersal * 1.0  # T+aA->HT+aA
+anarates[39][34] := extinction  # YT+aA->T+aA
+anarates[34][39] := dispersal * 1.0  # T+aA->YT+aA
+anarates[41][34] := extinction  # TO+aA->T+aA
+anarates[34][41] := dispersal * 1.0  # T+aA->TO+aA
+anarates[38][35] := extinction  # HO+aA->O+aA
+anarates[35][38] := dispersal * 1.0  # O+aA->HO+aA
+anarates[40][35] := extinction  # YO+aA->O+aA
+anarates[35][40] := dispersal * 1.0  # O+aA->YO+aA
+anarates[41][35] := extinction  # TO+aA->O+aA
+anarates[35][41] := dispersal * 1.0  # O+aA->TO+aA
+anarates[42][36] := extinction  # HYT+aA->HY+aA
+anarates[36][42] := dispersal * 2.0  # HY+aA->HYT+aA
+anarates[43][36] := extinction  # HYO+aA->HY+aA
+anarates[36][43] := dispersal * 2.0  # HY+aA->HYO+aA
+anarates[42][37] := extinction  # HYT+aA->HT+aA
+anarates[37][42] := dispersal * 2.0  # HT+aA->HYT+aA
+anarates[44][37] := extinction  # HTO+aA->HT+aA
+anarates[37][44] := dispersal * 2.0  # HT+aA->HTO+aA
+anarates[43][38] := extinction  # HYO+aA->HO+aA
+anarates[38][43] := dispersal * 2.0  # HO+aA->HYO+aA
+anarates[44][38] := extinction  # HTO+aA->HO+aA
+anarates[38][44] := dispersal * 2.0  # HO+aA->HTO+aA
+anarates[42][39] := extinction  # HYT+aA->YT+aA
+anarates[39][42] := dispersal * 2.0  # YT+aA->HYT+aA
+anarates[45][39] := extinction  # YTO+aA->YT+aA
+anarates[39][45] := dispersal * 2.0  # YT+aA->YTO+aA
+anarates[43][40] := extinction  # HYO+aA->YO+aA
+anarates[40][43] := dispersal * 2.0  # YO+aA->HYO+aA
+anarates[45][40] := extinction  # YTO+aA->YO+aA
+anarates[40][45] := dispersal * 2.0  # YO+aA->YTO+aA
+anarates[44][41] := extinction  # HTO+aA->TO+aA
+anarates[41][44] := dispersal * 2.0  # TO+aA->HTO+aA
+anarates[45][41] := extinction  # YTO+aA->TO+aA
+anarates[41][45] := dispersal * 2.0  # TO+aA->YTO+aA
+anarates[46][42] := extinction  # HYTO+aA->HYT+aA
+anarates[42][46] := dispersal * 3.0  # HYT+aA->HYTO+aA
+anarates[46][43] := extinction  # HYTO+aA->HYO+aA
+anarates[43][46] := dispersal * 3.0  # HYO+aA->HYTO+aA
+anarates[46][44] := extinction  # HYTO+aA->HTO+aA
+anarates[44][46] := dispersal * 3.0  # HTO+aA->HYTO+aA
+anarates[46][45] := extinction  # HYTO+aA->YTO+aA
+anarates[45][46] := dispersal * 3.0  # YTO+aA->HYTO+aA
+
+anagenetic_ratematrix := fnFreeK(anarates, rescaled=false)
+
+# cladogenetic events
+clado_events[1] = [1,1,1] #[H+a,H+a,H+a]
+speciation_rates[1] := speciation/2
+clado_events[2] = [2,2,2] #[Y+a,Y+a,Y+a]
+speciation_rates[2] := speciation/2
+clado_events[3] = [3,3,3] #[T+a,T+a,T+a]
+speciation_rates[3] := speciation/2
+clado_events[4] = [4,4,4] #[O+a,O+a,O+a]
+speciation_rates[4] := speciation/2
+clado_events[5] = [5,5,1] #[HY+a,HY+a,H+a]
+clado_events[6] = [5,1,5] #[HY+a,H+a,HY+a]
+speciation_rates[5] := speciation/4
+speciation_rates[6] := speciation/4
+clado_events[7] = [5,1,2] #[HY+a,H+a,Y+a]
+clado_events[8] = [5,2,1] #[HY+a,Y+a,H+a]
+speciation_rates[7] := speciation/4
+speciation_rates[8] := speciation/4
+clado_events[9] = [5,5,2] #[HY+a,HY+a,Y+a]
+clado_events[10] = [5,2,5] #[HY+a,Y+a,HY+a]
+speciation_rates[9] := speciation/4
+speciation_rates[10] := speciation/4
+clado_events[11] = [5,2,1] #[HY+a,Y+a,H+a]
+clado_events[12] = [5,1,2] #[HY+a,H+a,Y+a]
+speciation_rates[11] := speciation/4
+speciation_rates[12] := speciation/4
+clado_events[13] = [6,6,1] #[HT+a,HT+a,H+a]
+clado_events[14] = [6,1,6] #[HT+a,H+a,HT+a]
+speciation_rates[13] := speciation/4
+speciation_rates[14] := speciation/4
+clado_events[15] = [6,1,3] #[HT+a,H+a,T+a]
+clado_events[16] = [6,3,1] #[HT+a,T+a,H+a]
+speciation_rates[15] := speciation/4
+speciation_rates[16] := speciation/4
+clado_events[17] = [6,6,3] #[HT+a,HT+a,T+a]
+clado_events[18] = [6,3,6] #[HT+a,T+a,HT+a]
+speciation_rates[17] := speciation/4
+speciation_rates[18] := speciation/4
+clado_events[19] = [6,3,1] #[HT+a,T+a,H+a]
+clado_events[20] = [6,1,3] #[HT+a,H+a,T+a]
+speciation_rates[19] := speciation/4
+speciation_rates[20] := speciation/4
+clado_events[21] = [7,7,1] #[HO+a,HO+a,H+a]
+clado_events[22] = [7,1,7] #[HO+a,H+a,HO+a]
+speciation_rates[21] := speciation/4
+speciation_rates[22] := speciation/4
+clado_events[23] = [7,1,4] #[HO+a,H+a,O+a]
+clado_events[24] = [7,4,1] #[HO+a,O+a,H+a]
+speciation_rates[23] := speciation/4
+speciation_rates[24] := speciation/4
+clado_events[25] = [7,7,4] #[HO+a,HO+a,O+a]
+clado_events[26] = [7,4,7] #[HO+a,O+a,HO+a]
+speciation_rates[25] := speciation/4
+speciation_rates[26] := speciation/4
+clado_events[27] = [7,4,1] #[HO+a,O+a,H+a]
+clado_events[28] = [7,1,4] #[HO+a,H+a,O+a]
+speciation_rates[27] := speciation/4
+speciation_rates[28] := speciation/4
+clado_events[29] = [8,8,2] #[YT+a,YT+a,Y+a]
+clado_events[30] = [8,2,8] #[YT+a,Y+a,YT+a]
+speciation_rates[29] := speciation/4
+speciation_rates[30] := speciation/4
+clado_events[31] = [8,2,3] #[YT+a,Y+a,T+a]
+clado_events[32] = [8,3,2] #[YT+a,T+a,Y+a]
+speciation_rates[31] := speciation/4
+speciation_rates[32] := speciation/4
+clado_events[33] = [8,8,3] #[YT+a,YT+a,T+a]
+clado_events[34] = [8,3,8] #[YT+a,T+a,YT+a]
+speciation_rates[33] := speciation/4
+speciation_rates[34] := speciation/4
+clado_events[35] = [8,3,2] #[YT+a,T+a,Y+a]
+clado_events[36] = [8,2,3] #[YT+a,Y+a,T+a]
+speciation_rates[35] := speciation/4
+speciation_rates[36] := speciation/4
+clado_events[37] = [9,9,2] #[YO+a,YO+a,Y+a]
+clado_events[38] = [9,2,9] #[YO+a,Y+a,YO+a]
+speciation_rates[37] := speciation/4
+speciation_rates[38] := speciation/4
+clado_events[39] = [9,2,4] #[YO+a,Y+a,O+a]
+clado_events[40] = [9,4,2] #[YO+a,O+a,Y+a]
+speciation_rates[39] := speciation/4
+speciation_rates[40] := speciation/4
+clado_events[41] = [9,9,4] #[YO+a,YO+a,O+a]
+clado_events[42] = [9,4,9] #[YO+a,O+a,YO+a]
+speciation_rates[41] := speciation/4
+speciation_rates[42] := speciation/4
+clado_events[43] = [9,4,2] #[YO+a,O+a,Y+a]
+clado_events[44] = [9,2,4] #[YO+a,Y+a,O+a]
+speciation_rates[43] := speciation/4
+speciation_rates[44] := speciation/4
+clado_events[45] = [10,10,3] #[TO+a,TO+a,T+a]
+clado_events[46] = [10,3,10] #[TO+a,T+a,TO+a]
+speciation_rates[45] := speciation/4
+speciation_rates[46] := speciation/4
+clado_events[47] = [10,3,4] #[TO+a,T+a,O+a]
+clado_events[48] = [10,4,3] #[TO+a,O+a,T+a]
+speciation_rates[47] := speciation/4
+speciation_rates[48] := speciation/4
+clado_events[49] = [10,10,4] #[TO+a,TO+a,O+a]
+clado_events[50] = [10,4,10] #[TO+a,O+a,TO+a]
+speciation_rates[49] := speciation/4
+speciation_rates[50] := speciation/4
+clado_events[51] = [10,4,3] #[TO+a,O+a,T+a]
+clado_events[52] = [10,3,4] #[TO+a,T+a,O+a]
+speciation_rates[51] := speciation/4
+speciation_rates[52] := speciation/4
+clado_events[53] = [11,11,1] #[HYT+a,HYT+a,H+a]
+clado_events[54] = [11,1,11] #[HYT+a,H+a,HYT+a]
+speciation_rates[53] := speciation/4
+speciation_rates[54] := speciation/4
+clado_events[55] = [11,1,8] #[HYT+a,H+a,YT+a]
+clado_events[56] = [11,8,1] #[HYT+a,YT+a,H+a]
+speciation_rates[55] := speciation/4
+speciation_rates[56] := speciation/4
+clado_events[57] = [11,11,2] #[HYT+a,HYT+a,Y+a]
+clado_events[58] = [11,2,11] #[HYT+a,Y+a,HYT+a]
+speciation_rates[57] := speciation/4
+speciation_rates[58] := speciation/4
+clado_events[59] = [11,2,6] #[HYT+a,Y+a,HT+a]
+clado_events[60] = [11,6,2] #[HYT+a,HT+a,Y+a]
+speciation_rates[59] := speciation/4
+speciation_rates[60] := speciation/4
+clado_events[61] = [11,11,3] #[HYT+a,HYT+a,T+a]
+clado_events[62] = [11,3,11] #[HYT+a,T+a,HYT+a]
+speciation_rates[61] := speciation/4
+speciation_rates[62] := speciation/4
+clado_events[63] = [11,3,5] #[HYT+a,T+a,HY+a]
+clado_events[64] = [11,5,3] #[HYT+a,HY+a,T+a]
+speciation_rates[63] := speciation/4
+speciation_rates[64] := speciation/4
+clado_events[65] = [12,12,1] #[HYO+a,HYO+a,H+a]
+clado_events[66] = [12,1,12] #[HYO+a,H+a,HYO+a]
+speciation_rates[65] := speciation/4
+speciation_rates[66] := speciation/4
+clado_events[67] = [12,1,9] #[HYO+a,H+a,YO+a]
+clado_events[68] = [12,9,1] #[HYO+a,YO+a,H+a]
+speciation_rates[67] := speciation/4
+speciation_rates[68] := speciation/4
+clado_events[69] = [12,12,2] #[HYO+a,HYO+a,Y+a]
+clado_events[70] = [12,2,12] #[HYO+a,Y+a,HYO+a]
+speciation_rates[69] := speciation/4
+speciation_rates[70] := speciation/4
+clado_events[71] = [12,2,7] #[HYO+a,Y+a,HO+a]
+clado_events[72] = [12,7,2] #[HYO+a,HO+a,Y+a]
+speciation_rates[71] := speciation/4
+speciation_rates[72] := speciation/4
+clado_events[73] = [12,12,4] #[HYO+a,HYO+a,O+a]
+clado_events[74] = [12,4,12] #[HYO+a,O+a,HYO+a]
+speciation_rates[73] := speciation/4
+speciation_rates[74] := speciation/4
+clado_events[75] = [12,4,5] #[HYO+a,O+a,HY+a]
+clado_events[76] = [12,5,4] #[HYO+a,HY+a,O+a]
+speciation_rates[75] := speciation/4
+speciation_rates[76] := speciation/4
+clado_events[77] = [13,13,1] #[HTO+a,HTO+a,H+a]
+clado_events[78] = [13,1,13] #[HTO+a,H+a,HTO+a]
+speciation_rates[77] := speciation/4
+speciation_rates[78] := speciation/4
+clado_events[79] = [13,1,10] #[HTO+a,H+a,TO+a]
+clado_events[80] = [13,10,1] #[HTO+a,TO+a,H+a]
+speciation_rates[79] := speciation/4
+speciation_rates[80] := speciation/4
+clado_events[81] = [13,13,3] #[HTO+a,HTO+a,T+a]
+clado_events[82] = [13,3,13] #[HTO+a,T+a,HTO+a]
+speciation_rates[81] := speciation/4
+speciation_rates[82] := speciation/4
+clado_events[83] = [13,3,7] #[HTO+a,T+a,HO+a]
+clado_events[84] = [13,7,3] #[HTO+a,HO+a,T+a]
+speciation_rates[83] := speciation/4
+speciation_rates[84] := speciation/4
+clado_events[85] = [13,13,4] #[HTO+a,HTO+a,O+a]
+clado_events[86] = [13,4,13] #[HTO+a,O+a,HTO+a]
+speciation_rates[85] := speciation/4
+speciation_rates[86] := speciation/4
+clado_events[87] = [13,4,6] #[HTO+a,O+a,HT+a]
+clado_events[88] = [13,6,4] #[HTO+a,HT+a,O+a]
+speciation_rates[87] := speciation/4
+speciation_rates[88] := speciation/4
+clado_events[89] = [14,14,2] #[YTO+a,YTO+a,Y+a]
+clado_events[90] = [14,2,14] #[YTO+a,Y+a,YTO+a]
+speciation_rates[89] := speciation/4
+speciation_rates[90] := speciation/4
+clado_events[91] = [14,2,10] #[YTO+a,Y+a,TO+a]
+clado_events[92] = [14,10,2] #[YTO+a,TO+a,Y+a]
+speciation_rates[91] := speciation/4
+speciation_rates[92] := speciation/4
+clado_events[93] = [14,14,3] #[YTO+a,YTO+a,T+a]
+clado_events[94] = [14,3,14] #[YTO+a,T+a,YTO+a]
+speciation_rates[93] := speciation/4
+speciation_rates[94] := speciation/4
+clado_events[95] = [14,3,9] #[YTO+a,T+a,YO+a]
+clado_events[96] = [14,9,3] #[YTO+a,YO+a,T+a]
+speciation_rates[95] := speciation/4
+speciation_rates[96] := speciation/4
+clado_events[97] = [14,14,4] #[YTO+a,YTO+a,O+a]
+clado_events[98] = [14,4,14] #[YTO+a,O+a,YTO+a]
+speciation_rates[97] := speciation/4
+speciation_rates[98] := speciation/4
+clado_events[99] = [14,4,8] #[YTO+a,O+a,YT+a]
+clado_events[100] = [14,8,4] #[YTO+a,YT+a,O+a]
+speciation_rates[99] := speciation/4
+speciation_rates[100] := speciation/4
+clado_events[101] = [15,15,1] #[HYTO+a,HYTO+a,H+a]
+clado_events[102] = [15,1,15] #[HYTO+a,H+a,HYTO+a]
+speciation_rates[101] := speciation/4
+speciation_rates[102] := speciation/4
+clado_events[103] = [15,1,14] #[HYTO+a,H+a,YTO+a]
+clado_events[104] = [15,14,1] #[HYTO+a,YTO+a,H+a]
+speciation_rates[103] := speciation/4
+speciation_rates[104] := speciation/4
+clado_events[105] = [15,15,2] #[HYTO+a,HYTO+a,Y+a]
+clado_events[106] = [15,2,15] #[HYTO+a,Y+a,HYTO+a]
+speciation_rates[105] := speciation/4
+speciation_rates[106] := speciation/4
+clado_events[107] = [15,2,13] #[HYTO+a,Y+a,HTO+a]
+clado_events[108] = [15,13,2] #[HYTO+a,HTO+a,Y+a]
+speciation_rates[107] := speciation/4
+speciation_rates[108] := speciation/4
+clado_events[109] = [15,15,3] #[HYTO+a,HYTO+a,T+a]
+clado_events[110] = [15,3,15] #[HYTO+a,T+a,HYTO+a]
+speciation_rates[109] := speciation/4
+speciation_rates[110] := speciation/4
+clado_events[111] = [15,3,12] #[HYTO+a,T+a,HYO+a]
+clado_events[112] = [15,12,3] #[HYTO+a,HYO+a,T+a]
+speciation_rates[111] := speciation/4
+speciation_rates[112] := speciation/4
+clado_events[113] = [15,15,4] #[HYTO+a,HYTO+a,O+a]
+clado_events[114] = [15,4,15] #[HYTO+a,O+a,HYTO+a]
+speciation_rates[113] := speciation/4
+speciation_rates[114] := speciation/4
+clado_events[115] = [15,4,11] #[HYTO+a,O+a,HYT+a]
+clado_events[116] = [15,11,4] #[HYTO+a,HYT+a,O+a]
+speciation_rates[115] := speciation/4
+speciation_rates[116] := speciation/4
+clado_events[117] = [16,16,16] #[H+A,H+A,H+A]
+speciation_rates[117] := speciation/2
+clado_events[118] = [17,17,17] #[Y+A,Y+A,Y+A]
+speciation_rates[118] := speciation/2
+clado_events[119] = [18,18,18] #[T+A,T+A,T+A]
+speciation_rates[119] := speciation/2
+clado_events[120] = [19,19,19] #[O+A,O+A,O+A]
+speciation_rates[120] := speciation/2
+clado_events[121] = [20,20,16] #[HY+A,HY+A,H+A]
+clado_events[122] = [20,16,20] #[HY+A,H+A,HY+A]
+speciation_rates[121] := speciation/4
+speciation_rates[122] := speciation/4
+clado_events[123] = [20,16,17] #[HY+A,H+A,Y+A]
+clado_events[124] = [20,17,16] #[HY+A,Y+A,H+A]
+speciation_rates[123] := speciation/4
+speciation_rates[124] := speciation/4
+clado_events[125] = [20,20,17] #[HY+A,HY+A,Y+A]
+clado_events[126] = [20,17,20] #[HY+A,Y+A,HY+A]
+speciation_rates[125] := speciation/4
+speciation_rates[126] := speciation/4
+clado_events[127] = [20,17,16] #[HY+A,Y+A,H+A]
+clado_events[128] = [20,16,17] #[HY+A,H+A,Y+A]
+speciation_rates[127] := speciation/4
+speciation_rates[128] := speciation/4
+clado_events[129] = [21,21,16] #[HT+A,HT+A,H+A]
+clado_events[130] = [21,16,21] #[HT+A,H+A,HT+A]
+speciation_rates[129] := speciation/4
+speciation_rates[130] := speciation/4
+clado_events[131] = [21,16,18] #[HT+A,H+A,T+A]
+clado_events[132] = [21,18,16] #[HT+A,T+A,H+A]
+speciation_rates[131] := speciation/4
+speciation_rates[132] := speciation/4
+clado_events[133] = [21,21,18] #[HT+A,HT+A,T+A]
+clado_events[134] = [21,18,21] #[HT+A,T+A,HT+A]
+speciation_rates[133] := speciation/4
+speciation_rates[134] := speciation/4
+clado_events[135] = [21,18,16] #[HT+A,T+A,H+A]
+clado_events[136] = [21,16,18] #[HT+A,H+A,T+A]
+speciation_rates[135] := speciation/4
+speciation_rates[136] := speciation/4
+clado_events[137] = [22,22,16] #[HO+A,HO+A,H+A]
+clado_events[138] = [22,16,22] #[HO+A,H+A,HO+A]
+speciation_rates[137] := speciation/4
+speciation_rates[138] := speciation/4
+clado_events[139] = [22,16,19] #[HO+A,H+A,O+A]
+clado_events[140] = [22,19,16] #[HO+A,O+A,H+A]
+speciation_rates[139] := speciation/4
+speciation_rates[140] := speciation/4
+clado_events[141] = [22,22,19] #[HO+A,HO+A,O+A]
+clado_events[142] = [22,19,22] #[HO+A,O+A,HO+A]
+speciation_rates[141] := speciation/4
+speciation_rates[142] := speciation/4
+clado_events[143] = [22,19,16] #[HO+A,O+A,H+A]
+clado_events[144] = [22,16,19] #[HO+A,H+A,O+A]
+speciation_rates[143] := speciation/4
+speciation_rates[144] := speciation/4
+clado_events[145] = [23,23,17] #[YT+A,YT+A,Y+A]
+clado_events[146] = [23,17,23] #[YT+A,Y+A,YT+A]
+speciation_rates[145] := speciation/4
+speciation_rates[146] := speciation/4
+clado_events[147] = [23,17,18] #[YT+A,Y+A,T+A]
+clado_events[148] = [23,18,17] #[YT+A,T+A,Y+A]
+speciation_rates[147] := speciation/4
+speciation_rates[148] := speciation/4
+clado_events[149] = [23,23,18] #[YT+A,YT+A,T+A]
+clado_events[150] = [23,18,23] #[YT+A,T+A,YT+A]
+speciation_rates[149] := speciation/4
+speciation_rates[150] := speciation/4
+clado_events[151] = [23,18,17] #[YT+A,T+A,Y+A]
+clado_events[152] = [23,17,18] #[YT+A,Y+A,T+A]
+speciation_rates[151] := speciation/4
+speciation_rates[152] := speciation/4
+clado_events[153] = [24,24,17] #[YO+A,YO+A,Y+A]
+clado_events[154] = [24,17,24] #[YO+A,Y+A,YO+A]
+speciation_rates[153] := speciation/4
+speciation_rates[154] := speciation/4
+clado_events[155] = [24,17,19] #[YO+A,Y+A,O+A]
+clado_events[156] = [24,19,17] #[YO+A,O+A,Y+A]
+speciation_rates[155] := speciation/4
+speciation_rates[156] := speciation/4
+clado_events[157] = [24,24,19] #[YO+A,YO+A,O+A]
+clado_events[158] = [24,19,24] #[YO+A,O+A,YO+A]
+speciation_rates[157] := speciation/4
+speciation_rates[158] := speciation/4
+clado_events[159] = [24,19,17] #[YO+A,O+A,Y+A]
+clado_events[160] = [24,17,19] #[YO+A,Y+A,O+A]
+speciation_rates[159] := speciation/4
+speciation_rates[160] := speciation/4
+clado_events[161] = [25,25,18] #[TO+A,TO+A,T+A]
+clado_events[162] = [25,18,25] #[TO+A,T+A,TO+A]
+speciation_rates[161] := speciation/4
+speciation_rates[162] := speciation/4
+clado_events[163] = [25,18,19] #[TO+A,T+A,O+A]
+clado_events[164] = [25,19,18] #[TO+A,O+A,T+A]
+speciation_rates[163] := speciation/4
+speciation_rates[164] := speciation/4
+clado_events[165] = [25,25,19] #[TO+A,TO+A,O+A]
+clado_events[166] = [25,19,25] #[TO+A,O+A,TO+A]
+speciation_rates[165] := speciation/4
+speciation_rates[166] := speciation/4
+clado_events[167] = [25,19,18] #[TO+A,O+A,T+A]
+clado_events[168] = [25,18,19] #[TO+A,T+A,O+A]
+speciation_rates[167] := speciation/4
+speciation_rates[168] := speciation/4
+clado_events[169] = [26,26,16] #[HYT+A,HYT+A,H+A]
+clado_events[170] = [26,16,26] #[HYT+A,H+A,HYT+A]
+speciation_rates[169] := speciation/4
+speciation_rates[170] := speciation/4
+clado_events[171] = [26,16,23] #[HYT+A,H+A,YT+A]
+clado_events[172] = [26,23,16] #[HYT+A,YT+A,H+A]
+speciation_rates[171] := speciation/4
+speciation_rates[172] := speciation/4
+clado_events[173] = [26,26,17] #[HYT+A,HYT+A,Y+A]
+clado_events[174] = [26,17,26] #[HYT+A,Y+A,HYT+A]
+speciation_rates[173] := speciation/4
+speciation_rates[174] := speciation/4
+clado_events[175] = [26,17,21] #[HYT+A,Y+A,HT+A]
+clado_events[176] = [26,21,17] #[HYT+A,HT+A,Y+A]
+speciation_rates[175] := speciation/4
+speciation_rates[176] := speciation/4
+clado_events[177] = [26,26,18] #[HYT+A,HYT+A,T+A]
+clado_events[178] = [26,18,26] #[HYT+A,T+A,HYT+A]
+speciation_rates[177] := speciation/4
+speciation_rates[178] := speciation/4
+clado_events[179] = [26,18,20] #[HYT+A,T+A,HY+A]
+clado_events[180] = [26,20,18] #[HYT+A,HY+A,T+A]
+speciation_rates[179] := speciation/4
+speciation_rates[180] := speciation/4
+clado_events[181] = [27,27,16] #[HYO+A,HYO+A,H+A]
+clado_events[182] = [27,16,27] #[HYO+A,H+A,HYO+A]
+speciation_rates[181] := speciation/4
+speciation_rates[182] := speciation/4
+clado_events[183] = [27,16,24] #[HYO+A,H+A,YO+A]
+clado_events[184] = [27,24,16] #[HYO+A,YO+A,H+A]
+speciation_rates[183] := speciation/4
+speciation_rates[184] := speciation/4
+clado_events[185] = [27,27,17] #[HYO+A,HYO+A,Y+A]
+clado_events[186] = [27,17,27] #[HYO+A,Y+A,HYO+A]
+speciation_rates[185] := speciation/4
+speciation_rates[186] := speciation/4
+clado_events[187] = [27,17,22] #[HYO+A,Y+A,HO+A]
+clado_events[188] = [27,22,17] #[HYO+A,HO+A,Y+A]
+speciation_rates[187] := speciation/4
+speciation_rates[188] := speciation/4
+clado_events[189] = [27,27,19] #[HYO+A,HYO+A,O+A]
+clado_events[190] = [27,19,27] #[HYO+A,O+A,HYO+A]
+speciation_rates[189] := speciation/4
+speciation_rates[190] := speciation/4
+clado_events[191] = [27,19,20] #[HYO+A,O+A,HY+A]
+clado_events[192] = [27,20,19] #[HYO+A,HY+A,O+A]
+speciation_rates[191] := speciation/4
+speciation_rates[192] := speciation/4
+clado_events[193] = [28,28,16] #[HTO+A,HTO+A,H+A]
+clado_events[194] = [28,16,28] #[HTO+A,H+A,HTO+A]
+speciation_rates[193] := speciation/4
+speciation_rates[194] := speciation/4
+clado_events[195] = [28,16,25] #[HTO+A,H+A,TO+A]
+clado_events[196] = [28,25,16] #[HTO+A,TO+A,H+A]
+speciation_rates[195] := speciation/4
+speciation_rates[196] := speciation/4
+clado_events[197] = [28,28,18] #[HTO+A,HTO+A,T+A]
+clado_events[198] = [28,18,28] #[HTO+A,T+A,HTO+A]
+speciation_rates[197] := speciation/4
+speciation_rates[198] := speciation/4
+clado_events[199] = [28,18,22] #[HTO+A,T+A,HO+A]
+clado_events[200] = [28,22,18] #[HTO+A,HO+A,T+A]
+speciation_rates[199] := speciation/4
+speciation_rates[200] := speciation/4
+clado_events[201] = [28,28,19] #[HTO+A,HTO+A,O+A]
+clado_events[202] = [28,19,28] #[HTO+A,O+A,HTO+A]
+speciation_rates[201] := speciation/4
+speciation_rates[202] := speciation/4
+clado_events[203] = [28,19,21] #[HTO+A,O+A,HT+A]
+clado_events[204] = [28,21,19] #[HTO+A,HT+A,O+A]
+speciation_rates[203] := speciation/4
+speciation_rates[204] := speciation/4
+clado_events[205] = [29,29,17] #[YTO+A,YTO+A,Y+A]
+clado_events[206] = [29,17,29] #[YTO+A,Y+A,YTO+A]
+speciation_rates[205] := speciation/4
+speciation_rates[206] := speciation/4
+clado_events[207] = [29,17,25] #[YTO+A,Y+A,TO+A]
+clado_events[208] = [29,25,17] #[YTO+A,TO+A,Y+A]
+speciation_rates[207] := speciation/4
+speciation_rates[208] := speciation/4
+clado_events[209] = [29,29,18] #[YTO+A,YTO+A,T+A]
+clado_events[210] = [29,18,29] #[YTO+A,T+A,YTO+A]
+speciation_rates[209] := speciation/4
+speciation_rates[210] := speciation/4
+clado_events[211] = [29,18,24] #[YTO+A,T+A,YO+A]
+clado_events[212] = [29,24,18] #[YTO+A,YO+A,T+A]
+speciation_rates[211] := speciation/4
+speciation_rates[212] := speciation/4
+clado_events[213] = [29,29,19] #[YTO+A,YTO+A,O+A]
+clado_events[214] = [29,19,29] #[YTO+A,O+A,YTO+A]
+speciation_rates[213] := speciation/4
+speciation_rates[214] := speciation/4
+clado_events[215] = [29,19,23] #[YTO+A,O+A,YT+A]
+clado_events[216] = [29,23,19] #[YTO+A,YT+A,O+A]
+speciation_rates[215] := speciation/4
+speciation_rates[216] := speciation/4
+clado_events[217] = [30,30,16] #[HYTO+A,HYTO+A,H+A]
+clado_events[218] = [30,16,30] #[HYTO+A,H+A,HYTO+A]
+speciation_rates[217] := speciation/4
+speciation_rates[218] := speciation/4
+clado_events[219] = [30,16,29] #[HYTO+A,H+A,YTO+A]
+clado_events[220] = [30,29,16] #[HYTO+A,YTO+A,H+A]
+speciation_rates[219] := speciation/4
+speciation_rates[220] := speciation/4
+clado_events[221] = [30,30,17] #[HYTO+A,HYTO+A,Y+A]
+clado_events[222] = [30,17,30] #[HYTO+A,Y+A,HYTO+A]
+speciation_rates[221] := speciation/4
+speciation_rates[222] := speciation/4
+clado_events[223] = [30,17,28] #[HYTO+A,Y+A,HTO+A]
+clado_events[224] = [30,28,17] #[HYTO+A,HTO+A,Y+A]
+speciation_rates[223] := speciation/4
+speciation_rates[224] := speciation/4
+clado_events[225] = [30,30,18] #[HYTO+A,HYTO+A,T+A]
+clado_events[226] = [30,18,30] #[HYTO+A,T+A,HYTO+A]
+speciation_rates[225] := speciation/4
+speciation_rates[226] := speciation/4
+clado_events[227] = [30,18,27] #[HYTO+A,T+A,HYO+A]
+clado_events[228] = [30,27,18] #[HYTO+A,HYO+A,T+A]
+speciation_rates[227] := speciation/4
+speciation_rates[228] := speciation/4
+clado_events[229] = [30,30,19] #[HYTO+A,HYTO+A,O+A]
+clado_events[230] = [30,19,30] #[HYTO+A,O+A,HYTO+A]
+speciation_rates[229] := speciation/4
+speciation_rates[230] := speciation/4
+clado_events[231] = [30,19,26] #[HYTO+A,O+A,HYT+A]
+clado_events[232] = [30,26,19] #[HYTO+A,HYT+A,O+A]
+speciation_rates[231] := speciation/4
+speciation_rates[232] := speciation/4
+clado_events[233] = [31,31,31] #[H+aA,H+aA,H+aA]
+speciation_rates[233] := speciation/2
+clado_events[234] = [32,32,32] #[Y+aA,Y+aA,Y+aA]
+speciation_rates[234] := speciation/2
+clado_events[235] = [33,33,33] #[T+aA,T+aA,T+aA]
+speciation_rates[235] := speciation/2
+clado_events[236] = [34,34,34] #[O+aA,O+aA,O+aA]
+speciation_rates[236] := speciation/2
+clado_events[237] = [35,35,31] #[HY+aA,HY+aA,H+aA]
+clado_events[238] = [35,31,35] #[HY+aA,H+aA,HY+aA]
+speciation_rates[237] := speciation/4
+speciation_rates[238] := speciation/4
+clado_events[239] = [35,31,32] #[HY+aA,H+aA,Y+aA]
+clado_events[240] = [35,32,31] #[HY+aA,Y+aA,H+aA]
+speciation_rates[239] := speciation/4
+speciation_rates[240] := speciation/4
+clado_events[241] = [35,35,32] #[HY+aA,HY+aA,Y+aA]
+clado_events[242] = [35,32,35] #[HY+aA,Y+aA,HY+aA]
+speciation_rates[241] := speciation/4
+speciation_rates[242] := speciation/4
+clado_events[243] = [35,32,31] #[HY+aA,Y+aA,H+aA]
+clado_events[244] = [35,31,32] #[HY+aA,H+aA,Y+aA]
+speciation_rates[243] := speciation/4
+speciation_rates[244] := speciation/4
+clado_events[245] = [36,36,31] #[HT+aA,HT+aA,H+aA]
+clado_events[246] = [36,31,36] #[HT+aA,H+aA,HT+aA]
+speciation_rates[245] := speciation/4
+speciation_rates[246] := speciation/4
+clado_events[247] = [36,31,33] #[HT+aA,H+aA,T+aA]
+clado_events[248] = [36,33,31] #[HT+aA,T+aA,H+aA]
+speciation_rates[247] := speciation/4
+speciation_rates[248] := speciation/4
+clado_events[249] = [36,36,33] #[HT+aA,HT+aA,T+aA]
+clado_events[250] = [36,33,36] #[HT+aA,T+aA,HT+aA]
+speciation_rates[249] := speciation/4
+speciation_rates[250] := speciation/4
+clado_events[251] = [36,33,31] #[HT+aA,T+aA,H+aA]
+clado_events[252] = [36,31,33] #[HT+aA,H+aA,T+aA]
+speciation_rates[251] := speciation/4
+speciation_rates[252] := speciation/4
+clado_events[253] = [37,37,31] #[HO+aA,HO+aA,H+aA]
+clado_events[254] = [37,31,37] #[HO+aA,H+aA,HO+aA]
+speciation_rates[253] := speciation/4
+speciation_rates[254] := speciation/4
+clado_events[255] = [37,31,34] #[HO+aA,H+aA,O+aA]
+clado_events[256] = [37,34,31] #[HO+aA,O+aA,H+aA]
+speciation_rates[255] := speciation/4
+speciation_rates[256] := speciation/4
+clado_events[257] = [37,37,34] #[HO+aA,HO+aA,O+aA]
+clado_events[258] = [37,34,37] #[HO+aA,O+aA,HO+aA]
+speciation_rates[257] := speciation/4
+speciation_rates[258] := speciation/4
+clado_events[259] = [37,34,31] #[HO+aA,O+aA,H+aA]
+clado_events[260] = [37,31,34] #[HO+aA,H+aA,O+aA]
+speciation_rates[259] := speciation/4
+speciation_rates[260] := speciation/4
+clado_events[261] = [38,38,32] #[YT+aA,YT+aA,Y+aA]
+clado_events[262] = [38,32,38] #[YT+aA,Y+aA,YT+aA]
+speciation_rates[261] := speciation/4
+speciation_rates[262] := speciation/4
+clado_events[263] = [38,32,33] #[YT+aA,Y+aA,T+aA]
+clado_events[264] = [38,33,32] #[YT+aA,T+aA,Y+aA]
+speciation_rates[263] := speciation/4
+speciation_rates[264] := speciation/4
+clado_events[265] = [38,38,33] #[YT+aA,YT+aA,T+aA]
+clado_events[266] = [38,33,38] #[YT+aA,T+aA,YT+aA]
+speciation_rates[265] := speciation/4
+speciation_rates[266] := speciation/4
+clado_events[267] = [38,33,32] #[YT+aA,T+aA,Y+aA]
+clado_events[268] = [38,32,33] #[YT+aA,Y+aA,T+aA]
+speciation_rates[267] := speciation/4
+speciation_rates[268] := speciation/4
+clado_events[269] = [39,39,32] #[YO+aA,YO+aA,Y+aA]
+clado_events[270] = [39,32,39] #[YO+aA,Y+aA,YO+aA]
+speciation_rates[269] := speciation/4
+speciation_rates[270] := speciation/4
+clado_events[271] = [39,32,34] #[YO+aA,Y+aA,O+aA]
+clado_events[272] = [39,34,32] #[YO+aA,O+aA,Y+aA]
+speciation_rates[271] := speciation/4
+speciation_rates[272] := speciation/4
+clado_events[273] = [39,39,34] #[YO+aA,YO+aA,O+aA]
+clado_events[274] = [39,34,39] #[YO+aA,O+aA,YO+aA]
+speciation_rates[273] := speciation/4
+speciation_rates[274] := speciation/4
+clado_events[275] = [39,34,32] #[YO+aA,O+aA,Y+aA]
+clado_events[276] = [39,32,34] #[YO+aA,Y+aA,O+aA]
+speciation_rates[275] := speciation/4
+speciation_rates[276] := speciation/4
+clado_events[277] = [40,40,33] #[TO+aA,TO+aA,T+aA]
+clado_events[278] = [40,33,40] #[TO+aA,T+aA,TO+aA]
+speciation_rates[277] := speciation/4
+speciation_rates[278] := speciation/4
+clado_events[279] = [40,33,34] #[TO+aA,T+aA,O+aA]
+clado_events[280] = [40,34,33] #[TO+aA,O+aA,T+aA]
+speciation_rates[279] := speciation/4
+speciation_rates[280] := speciation/4
+clado_events[281] = [40,40,34] #[TO+aA,TO+aA,O+aA]
+clado_events[282] = [40,34,40] #[TO+aA,O+aA,TO+aA]
+speciation_rates[281] := speciation/4
+speciation_rates[282] := speciation/4
+clado_events[283] = [40,34,33] #[TO+aA,O+aA,T+aA]
+clado_events[284] = [40,33,34] #[TO+aA,T+aA,O+aA]
+speciation_rates[283] := speciation/4
+speciation_rates[284] := speciation/4
+clado_events[285] = [41,41,31] #[HYT+aA,HYT+aA,H+aA]
+clado_events[286] = [41,31,41] #[HYT+aA,H+aA,HYT+aA]
+speciation_rates[285] := speciation/4
+speciation_rates[286] := speciation/4
+clado_events[287] = [41,31,38] #[HYT+aA,H+aA,YT+aA]
+clado_events[288] = [41,38,31] #[HYT+aA,YT+aA,H+aA]
+speciation_rates[287] := speciation/4
+speciation_rates[288] := speciation/4
+clado_events[289] = [41,41,32] #[HYT+aA,HYT+aA,Y+aA]
+clado_events[290] = [41,32,41] #[HYT+aA,Y+aA,HYT+aA]
+speciation_rates[289] := speciation/4
+speciation_rates[290] := speciation/4
+clado_events[291] = [41,32,36] #[HYT+aA,Y+aA,HT+aA]
+clado_events[292] = [41,36,32] #[HYT+aA,HT+aA,Y+aA]
+speciation_rates[291] := speciation/4
+speciation_rates[292] := speciation/4
+clado_events[293] = [41,41,33] #[HYT+aA,HYT+aA,T+aA]
+clado_events[294] = [41,33,41] #[HYT+aA,T+aA,HYT+aA]
+speciation_rates[293] := speciation/4
+speciation_rates[294] := speciation/4
+clado_events[295] = [41,33,35] #[HYT+aA,T+aA,HY+aA]
+clado_events[296] = [41,35,33] #[HYT+aA,HY+aA,T+aA]
+speciation_rates[295] := speciation/4
+speciation_rates[296] := speciation/4
+clado_events[297] = [42,42,31] #[HYO+aA,HYO+aA,H+aA]
+clado_events[298] = [42,31,42] #[HYO+aA,H+aA,HYO+aA]
+speciation_rates[297] := speciation/4
+speciation_rates[298] := speciation/4
+clado_events[299] = [42,31,39] #[HYO+aA,H+aA,YO+aA]
+clado_events[300] = [42,39,31] #[HYO+aA,YO+aA,H+aA]
+speciation_rates[299] := speciation/4
+speciation_rates[300] := speciation/4
+clado_events[301] = [42,42,32] #[HYO+aA,HYO+aA,Y+aA]
+clado_events[302] = [42,32,42] #[HYO+aA,Y+aA,HYO+aA]
+speciation_rates[301] := speciation/4
+speciation_rates[302] := speciation/4
+clado_events[303] = [42,32,37] #[HYO+aA,Y+aA,HO+aA]
+clado_events[304] = [42,37,32] #[HYO+aA,HO+aA,Y+aA]
+speciation_rates[303] := speciation/4
+speciation_rates[304] := speciation/4
+clado_events[305] = [42,42,34] #[HYO+aA,HYO+aA,O+aA]
+clado_events[306] = [42,34,42] #[HYO+aA,O+aA,HYO+aA]
+speciation_rates[305] := speciation/4
+speciation_rates[306] := speciation/4
+clado_events[307] = [42,34,35] #[HYO+aA,O+aA,HY+aA]
+clado_events[308] = [42,35,34] #[HYO+aA,HY+aA,O+aA]
+speciation_rates[307] := speciation/4
+speciation_rates[308] := speciation/4
+clado_events[309] = [43,43,31] #[HTO+aA,HTO+aA,H+aA]
+clado_events[310] = [43,31,43] #[HTO+aA,H+aA,HTO+aA]
+speciation_rates[309] := speciation/4
+speciation_rates[310] := speciation/4
+clado_events[311] = [43,31,40] #[HTO+aA,H+aA,TO+aA]
+clado_events[312] = [43,40,31] #[HTO+aA,TO+aA,H+aA]
+speciation_rates[311] := speciation/4
+speciation_rates[312] := speciation/4
+clado_events[313] = [43,43,33] #[HTO+aA,HTO+aA,T+aA]
+clado_events[314] = [43,33,43] #[HTO+aA,T+aA,HTO+aA]
+speciation_rates[313] := speciation/4
+speciation_rates[314] := speciation/4
+clado_events[315] = [43,33,37] #[HTO+aA,T+aA,HO+aA]
+clado_events[316] = [43,37,33] #[HTO+aA,HO+aA,T+aA]
+speciation_rates[315] := speciation/4
+speciation_rates[316] := speciation/4
+clado_events[317] = [43,43,34] #[HTO+aA,HTO+aA,O+aA]
+clado_events[318] = [43,34,43] #[HTO+aA,O+aA,HTO+aA]
+speciation_rates[317] := speciation/4
+speciation_rates[318] := speciation/4
+clado_events[319] = [43,34,36] #[HTO+aA,O+aA,HT+aA]
+clado_events[320] = [43,36,34] #[HTO+aA,HT+aA,O+aA]
+speciation_rates[319] := speciation/4
+speciation_rates[320] := speciation/4
+clado_events[321] = [44,44,32] #[YTO+aA,YTO+aA,Y+aA]
+clado_events[322] = [44,32,44] #[YTO+aA,Y+aA,YTO+aA]
+speciation_rates[321] := speciation/4
+speciation_rates[322] := speciation/4
+clado_events[323] = [44,32,40] #[YTO+aA,Y+aA,TO+aA]
+clado_events[324] = [44,40,32] #[YTO+aA,TO+aA,Y+aA]
+speciation_rates[323] := speciation/4
+speciation_rates[324] := speciation/4
+clado_events[325] = [44,44,33] #[YTO+aA,YTO+aA,T+aA]
+clado_events[326] = [44,33,44] #[YTO+aA,T+aA,YTO+aA]
+speciation_rates[325] := speciation/4
+speciation_rates[326] := speciation/4
+clado_events[327] = [44,33,39] #[YTO+aA,T+aA,YO+aA]
+clado_events[328] = [44,39,33] #[YTO+aA,YO+aA,T+aA]
+speciation_rates[327] := speciation/4
+speciation_rates[328] := speciation/4
+clado_events[329] = [44,44,34] #[YTO+aA,YTO+aA,O+aA]
+clado_events[330] = [44,34,44] #[YTO+aA,O+aA,YTO+aA]
+speciation_rates[329] := speciation/4
+speciation_rates[330] := speciation/4
+clado_events[331] = [44,34,38] #[YTO+aA,O+aA,YT+aA]
+clado_events[332] = [44,38,34] #[YTO+aA,YT+aA,O+aA]
+speciation_rates[331] := speciation/4
+speciation_rates[332] := speciation/4
+clado_events[333] = [45,45,31] #[HYTO+aA,HYTO+aA,H+aA]
+clado_events[334] = [45,31,45] #[HYTO+aA,H+aA,HYTO+aA]
+speciation_rates[333] := speciation/4
+speciation_rates[334] := speciation/4
+clado_events[335] = [45,31,44] #[HYTO+aA,H+aA,YTO+aA]
+clado_events[336] = [45,44,31] #[HYTO+aA,YTO+aA,H+aA]
+speciation_rates[335] := speciation/4
+speciation_rates[336] := speciation/4
+clado_events[337] = [45,45,32] #[HYTO+aA,HYTO+aA,Y+aA]
+clado_events[338] = [45,32,45] #[HYTO+aA,Y+aA,HYTO+aA]
+speciation_rates[337] := speciation/4
+speciation_rates[338] := speciation/4
+clado_events[339] = [45,32,43] #[HYTO+aA,Y+aA,HTO+aA]
+clado_events[340] = [45,43,32] #[HYTO+aA,HTO+aA,Y+aA]
+speciation_rates[339] := speciation/4
+speciation_rates[340] := speciation/4
+clado_events[341] = [45,45,33] #[HYTO+aA,HYTO+aA,T+aA]
+clado_events[342] = [45,33,45] #[HYTO+aA,T+aA,HYTO+aA]
+speciation_rates[341] := speciation/4
+speciation_rates[342] := speciation/4
+clado_events[343] = [45,33,42] #[HYTO+aA,T+aA,HYO+aA]
+clado_events[344] = [45,42,33] #[HYTO+aA,HYO+aA,T+aA]
+speciation_rates[343] := speciation/4
+speciation_rates[344] := speciation/4
+clado_events[345] = [45,45,34] #[HYTO+aA,HYTO+aA,O+aA]
+clado_events[346] = [45,34,45] #[HYTO+aA,O+aA,HYTO+aA]
+speciation_rates[345] := speciation/4
+speciation_rates[346] := speciation/4
+clado_events[347] = [45,34,41] #[HYTO+aA,O+aA,HYT+aA]
+clado_events[348] = [45,41,34] #[HYTO+aA,HYT+aA,O+aA]
+speciation_rates[347] := speciation/4
+speciation_rates[348] := speciation/4
+
+clado_matrix := fnCladogeneticSpeciationRateMatrix(
+    clado_events, speciation_rates, 46)
+
+root_frequencies <- simplex([0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.25, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.25, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.25])
+
+total_diversity <- 765
+rho <- observed_phylogeny.ntips()/total_diversity
+classe ~ dnCDBDP(rootAge = root_age, cladoEventMap = clado_matrix, extinctionRates = extinction_rates, Q = anagenetic_ratematrix, delta = 1.0, pi = root_frequencies, rho = rho, condition = "time",nTimeSlices = 1000)
+# clamp the model with the observed data
+classe.clamp(observed_phylogeny)
+classe.clampCharData(chardata)
+
+#############
+# The Model #
+#############
+
+# workspace model wrapper
+mymodel = model(classe)
+
+# set up the monitors that will output parameter values to file and screen
+monitors[++mni] = mnModel(filename=outfilebase+".parameters.log", printgen=1)
+monitors[++mni] = mnJointConditionalAncestralState(
+    tree=observed_phylogeny, cdbdp=classe, type="NaturalNumbers", printgen=1, withTips=true,
+    withStartStates=true, filename=outfilebase+".anc_states.log")
+monitors[++mni] = mnScreen(printgen=1, speciation, extinction_rates,dispersal,biome_transition)
+monitors[++mni] = mnStochasticCharacterMap(cdbdp=classe, filename=outfilebase+".smap.log", printgen=1)
+
+################
+# The Analysis #
+################
+
+# workspace mcmc
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# pre-burnin to tune the proposals
+mymcmc.burnin(generations=200, tuningInterval=5)
+
+# run the MCMC
+mymcmc.run(generations=2000)
+##############################
+# Summarize ancestral states #
+##############################
+anc_states = readAncestralStateTrace(outfilebase+".anc_states.log")
+anc_tree = ancestralStateTree(tree=observed_phylogeny, ancestral_state_trace_vector=anc_states, include_start_states=true, file=outfilebase+".anc_states.tree", burnin=0.25, summary_statistic="MAP", site=1)
+
+################################
+# Stochastic character mapping #
+################################
+anc_state_trace = readAncestralStateTrace(outfilebase+".smap.log")
+characterMapTree(observed_phylogeny, anc_state_trace, character_file=outfilebase+".smap.tree", posterior_file=outfilebase+".posterior.tree", burnin=0.25, reconstruction="marginal")
+q()
